@@ -3,80 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>红石块工作室技术博客</title>
+    <title>我的 Issues 博客</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* Footer 样式 */
-        .blog-footer {
-            background: #333;
-            color: white;
-            padding: 2rem 0 1rem;
-            margin-top: 3rem;
-        }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .footer-content {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
-
-        .footer-section {
-            text-align: center;
-        }
-
-        .footer-section h4 {
-            margin-bottom: 1rem;
-            color: #fff;
-        }
-
-        .contact-info p {
-            margin: 0.5rem 0;
-            opacity: 0.8;
-        }
-
-        .footer-btn {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 0.6rem 1.5rem;
-            border-radius: 20px;
-            text-decoration: none;
-            margin-top: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .footer-btn:hover {
-            background: #5a6fd8;
-            transform: translateY(-2px);
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 1.5rem;
-            border-top: 1px solid #444;
-            color: #999;
-            font-size: 0.9rem;
-        }
-
-        .footer-note {
-            margin-top: 0.5rem;
-            font-style: italic;
-            opacity: 0.6;
-        }
-    </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1><i class="fas fa-book"></i> 红石块工作室技术博客</h1>
-            <p>本项目通过 GitHub Issues 驱动的静态博客</p>
+            <h1><i class="fas fa-book"></i> 我的技术博客</h1>
+            <p>通过 GitHub Issues 驱动的静态博客</p>
         </div>
     </header>
 
@@ -110,32 +45,12 @@
         </div>
     </main>
 
-    <footer class="blog-footer">
-        <div class="footer-container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>📬 联系我们</h4>
-                    <div class="contact-info">
-                        <p>📧 邮箱: _studio@163.com</p>
-                        <p>🐧 QQ群: 775375158</p>
-                    </div>
-                    <a href="https://pd.qq.com/s/1pv8kpjgu" class="footer-btn" target="_blank">
-                        💬 加入群聊
-                    </a>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>© <span id="currentYear"></span> 工作室 · 萌ICP备20230254号</p>
-                <p class="footer-note">还没备案呢想啥呢awa</p>
-            </div>
+    <footer>
+        <div class="container">
+            <p>Powered by GitHub Issues | 最后更新: <span id="lastUpdate"></span></p>
         </div>
     </footer>
 
     <script src="app.js"></script>
-    <script>
-        // 自动更新年份
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
-    </script>
 </body>
 </html>
