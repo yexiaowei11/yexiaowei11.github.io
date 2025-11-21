@@ -43,7 +43,7 @@ class IssuesBlog {
         if (cachedData) {
             console.log('✅ 使用缓存数据');
             this.issues = cachedData;
-            this.filteredIssues = [...this.issues]; // 重要：初始化 filteredIssues
+            this.filteredIssues = [...this.issues];
             this.renderPosts();
             return;
         }
@@ -51,7 +51,8 @@ class IssuesBlog {
         try {
             this.showLoading(true);
             
-            const apiUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USER}/${CONFIG.REPO_NAME}/issues?per_page=${CONFIG.PER_PAGE}&state=open`;
+            // 修复：添加排序参数和过滤
+            const apiUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USER}/${CONFIG.REPO_NAME}/issues?state=open&sort=created&direction=desc&per_page=${CONFIG.PER_PAGE}`;
             console.log('🌐 请求URL:', apiUrl);
             
             const response = await fetch(apiUrl);
@@ -61,11 +62,25 @@ class IssuesBlog {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
-            this.issues = await response.json();
-            console.log('📚 获取到文章数量:', this.issues.length);
+            let issues = await response.json();
+            console.log('📚 获取到文章数量:', issues.length);
             
+            // 修复：过滤掉 documentation 标签和其他不需要的 issues
+            issues = issues.filter(issue => {
+                const hasDocumentationLabel = issue.labels.some(label => 
+                    label.name.toLowerCase().includes('documentation')
+                );
+                const hasExcludedLabel = issue.labels.some(label => 
+                    ['wontfix', 'invalid', 'duplicate'].includes(label.name.toLowerCase())
+                );
+                return !hasDocumentationLabel && !hasExcludedLabel;
+            });
+            
+            console.log('📋 过滤后文章数量:', issues.length);
+            
+            this.issues = issues;
             this.cacheData(this.issues);
-            this.filteredIssues = [...this.issues]; // 重要：初始化 filteredIssues
+            this.filteredIssues = [...this.issues];
             this.renderPosts();
             
         } catch (error) {
