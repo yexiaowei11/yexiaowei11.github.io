@@ -1,7 +1,7 @@
 // 配置信息
 const CONFIG = {
     GITHUB_USER: 'Yexiaowei11',  // 替换为你的用户名
-    REPO_NAME: 'Yexiaowei11.github.io'      // 替换为你的仓库名
+    REPO_NAME: 'Yexiaowei11.github.io',      // 替换为你的仓库名
     PER_PAGE: 100,               // 每页文章数量
     CACHE_TIME: 30 * 60 * 1000   // 缓存时间30分钟
 };
