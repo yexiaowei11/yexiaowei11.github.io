@@ -1,47 +1,9 @@
-async function loadIssues() {
-    console.log('🔍 开始加载 Issues...');
-    console.log('📝 配置信息:', CONFIG);
-    
-    const cachedData = this.getCachedData();
-    if (cachedData) {
-        console.log('✅ 使用缓存数据');
-        this.issues = cachedData;
-        this.renderPosts();
-        return;
-    }
-
-    try {
-        this.showLoading(true);
-        
-        const apiUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USER}/${CONFIG.REPO_NAME}/issues?per_page=${CONFIG.PER_PAGE}&state=open`;
-        console.log('🌐 请求URL:', apiUrl);
-        
-        const response = await fetch(apiUrl);
-        console.log('📡 响应状态:', response.status, response.statusText);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        this.issues = await response.json();
-        console.log('📚 获取到文章数量:', this.issues.length);
-        
-        this.cacheData(this.issues);
-        this.renderPosts();
-        
-    } catch (error) {
-        console.error('❌ 加载失败:', error);
-        this.showError('加载文章失败: ' + error.message);
-    } finally {
-        this.showLoading(false);
-    }
-}
 // 配置信息
 const CONFIG = {
-    GITHUB_USER: 'Yexiaowei11',  // 替换为你的用户名
-    REPO_NAME: 'Yexiaowei11.github.io',      // 替换为你的仓库名
-    PER_PAGE: 100,               // 每页文章数量
-    CACHE_TIME: 30 * 60 * 1000   // 缓存时间30分钟
+    GITHUB_USER: 'Yexiaowei11',
+    REPO_NAME: 'Yexiaowei11.github.io',
+    PER_PAGE: 100,
+    CACHE_TIME: 30 * 60 * 1000
 };
 
 class IssuesBlog {
@@ -49,6 +11,7 @@ class IssuesBlog {
         this.issues = [];
         this.filteredIssues = [];
         this.currentFilter = 'all';
+        this.searchKeyword = '';
         this.init();
     }
 
@@ -74,10 +37,13 @@ class IssuesBlog {
     }
 
     async loadIssues() {
-        const cachedData = this.getCachedData();
+        console.log('🔍 开始加载 Issues...');
         
+        const cachedData = this.getCachedData();
         if (cachedData) {
+            console.log('✅ 使用缓存数据');
             this.issues = cachedData;
+            this.filteredIssues = [...this.issues]; // 重要：初始化 filteredIssues
             this.renderPosts();
             return;
         }
@@ -85,19 +51,26 @@ class IssuesBlog {
         try {
             this.showLoading(true);
             
-            const response = await fetch(
-                `https://api.github.com/repos/${CONFIG.GITHUB_USER}/${CONFIG.REPO_NAME}/issues?per_page=${CONFIG.PER_PAGE}&state=open`
-            );
+            const apiUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USER}/${CONFIG.REPO_NAME}/issues?per_page=${CONFIG.PER_PAGE}&state=open`;
+            console.log('🌐 请求URL:', apiUrl);
             
-            if (!response.ok) throw new Error('API 请求失败');
+            const response = await fetch(apiUrl);
+            console.log('📡 响应状态:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
             
             this.issues = await response.json();
+            console.log('📚 获取到文章数量:', this.issues.length);
+            
             this.cacheData(this.issues);
+            this.filteredIssues = [...this.issues]; // 重要：初始化 filteredIssues
             this.renderPosts();
             
         } catch (error) {
-            console.error('加载文章失败:', error);
-            this.showError('加载文章失败，请刷新重试');
+            console.error('❌ 加载失败:', error);
+            this.showError('加载文章失败: ' + error.message);
         } finally {
             this.showLoading(false);
         }
@@ -121,6 +94,8 @@ class IssuesBlog {
     }
 
     applyFilters() {
+        console.log('🔍 应用筛选 - 分类:', this.currentFilter, '搜索:', this.searchKeyword);
+        
         this.filteredIssues = this.issues.filter(issue => {
             // 分类筛选
             const labelMatch = this.currentFilter === 'all' || 
@@ -129,25 +104,34 @@ class IssuesBlog {
             // 搜索筛选
             const searchMatch = !this.searchKeyword || 
                 issue.title.toLowerCase().includes(this.searchKeyword) ||
-                issue.body.toLowerCase().includes(this.searchKeyword);
+                (issue.body && issue.body.toLowerCase().includes(this.searchKeyword));
             
             return labelMatch && searchMatch;
         });
 
+        console.log('📊 筛选后文章数量:', this.filteredIssues.length);
         this.renderPosts();
     }
 
     renderPosts() {
         const grid = document.getElementById('postsGrid');
+        const loading = document.getElementById('loading');
         const noResults = document.getElementById('noResults');
 
-        if (this.filteredIssues.length === 0) {
-            grid.innerHTML = '';
-            noResults.style.display = 'block';
+        if (loading) loading.style.display = 'none';
+
+        if (!grid) {
+            console.error('❌ 找不到 postsGrid 元素');
             return;
         }
 
-        noResults.style.display = 'none';
+        if (this.filteredIssues.length === 0) {
+            grid.innerHTML = '';
+            if (noResults) noResults.style.display = 'block';
+            return;
+        }
+
+        if (noResults) noResults.style.display = 'none';
         
         grid.innerHTML = this.filteredIssues.map(issue => `
             <article class="post-card" onclick="window.open('${issue.html_url}', '_blank')">
@@ -163,19 +147,21 @@ class IssuesBlog {
                 </div>
             </article>
         `).join('');
+
+        console.log('🎨 渲染完成，显示', this.filteredIssues.length, '篇文章');
     }
 
     markdownToText(markdown) {
         if (!markdown) return '暂无内容';
         return markdown
-            .replace(/!\[.*?\]\(.*?\)/g, '[图片]')  // 移除图片
-            .replace(/\[(.*?)\]\(.*?\)/g, '$1')     // 移除链接，保留文字
-            .replace(/#{1,6}\s?/g, '')             // 移除标题标记
-            .replace(/\*\*(.*?)\*\*/g, '$1')       // 移除粗体
-            .replace(/\*(.*?)\*/g, '$1')           // 移除斜体
-            .replace(/`(.*?)`/g, '$1')             // 移除代码标记
-            .replace(/\n/g, ' ')                   // 换行转空格
-            .substring(0, 150) + '...';            // 截取长度
+            .replace(/!\[.*?\]\(.*?\)/g, '[图片]')
+            .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+            .replace(/#{1,6}\s?/g, '')
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/\*(.*?)\*/g, '$1')
+            .replace(/`(.*?)`/g, '$1')
+            .replace(/\n/g, ' ')
+            .substring(0, 150) + '...';
     }
 
     escapeHtml(unsafe) {
@@ -196,15 +182,17 @@ class IssuesBlog {
     }
 
     showLoading(show) {
-        document.getElementById('loading').style.display = show ? 'block' : 'none';
+        const loading = document.getElementById('loading');
+        if (loading) loading.style.display = show ? 'block' : 'none';
     }
 
     showError(message) {
         const grid = document.getElementById('postsGrid');
-        grid.innerHTML = `<div class="error-message">${message}</div>`;
+        const loading = document.getElementById('loading');
+        if (loading) loading.style.display = 'none';
+        if (grid) grid.innerHTML = `<div class="error-message">${message}</div>`;
     }
 
-    // 缓存相关方法
     getCachedData() {
         const cached = localStorage.getItem('issues-blog-cache');
         if (cached) {
@@ -225,12 +213,16 @@ class IssuesBlog {
     }
 
     displayLastUpdate() {
-        document.getElementById('lastUpdate').textContent = 
-            new Date().toLocaleDateString('zh-CN');
+        const element = document.getElementById('lastUpdate');
+        if (element) {
+            element.textContent = new Date().toLocaleDateString('zh-CN');
+        }
     }
 }
 
 // 初始化博客
+console.log('🚀 开始初始化博客...');
 document.addEventListener('DOMContentLoaded', () => {
-    new IssuesBlog();
+    console.log('📄 DOM 加载完成，创建 IssuesBlog 实例');
+    window.issuesBlog = new IssuesBlog();
 });
