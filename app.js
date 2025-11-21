@@ -196,3 +196,5 @@ class IssuesBlog {
 document.addEventListener('DOMContentLoaded', () => {
     new IssuesBlog();
 });
+// 自动更新年份
+document.getElementById('currentYear').textContent = new Date().getFullYear();
