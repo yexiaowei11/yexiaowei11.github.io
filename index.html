@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的 Issues 博客</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-book"></i> 我的技术博客</h1>
+            <p>通过 GitHub Issues 驱动的静态博客</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <div class="nav-links">
+                <a href="#" class="active" data-filter="all">全部</a>
+                <a href="#" data-filter="教程">教程</a>
+                <a href="#" data-filter="随笔">随笔</a>
+                <a href="#" data-filter="项目">项目</a>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索文章...">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner fa-spin"></i> 正在加载文章...
+        </div>
+        
+        <div class="posts-grid" id="postsGrid">
+            <!-- 文章将通过 JS 动态加载 -->
+        </div>
+
+        <div class="no-results" id="noResults" style="display: none;">
+            <i class="fas fa-search"></i>
+            <h3>没有找到相关文章</h3>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Powered by GitHub Issues | 最后更新: <span id="lastUpdate"></span></p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
