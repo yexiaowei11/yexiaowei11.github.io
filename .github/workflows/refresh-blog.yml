@@ -2,7 +2,7 @@ name: Refresh Blog Cache
 
 on:
   schedule:
-    - cron: '0 22 * * *'  # 每天UTC 22:00执行一次
+    - cron: '0 22 * * 1'  # 每周一UTC 22:00执行一次
   workflow_dispatch:
 
 jobs:
